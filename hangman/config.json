@@ -2,7 +2,7 @@
 	"numberOfGuesses": 6,
 	"defaultChannel": "",
 	"allowConcurrentGuesses": true,
-	"allowStarterToGuess": true,
+	"allowStarterToGuess": false,
 	"messages": {
 		"begin": "A hangman game has been started in this channel by *<name>*!",
 		"alreadyBegan": "There is already a game running in this channel.",
