@@ -11,8 +11,8 @@ import (
     "regexp"
     "sort"
 
-    globals "github.com/TheGoodLookingCompany/slack/globals"
-    logging "github.com/TheGoodLookingCompany/slack/logging"
+    globals "github.com/aerophite/slacky/globals"
+    logging "github.com/aerophite/slacky/logging"
     "github.com/ejholmes/slash"
 )
 

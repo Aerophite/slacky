@@ -9,9 +9,9 @@ import (
     "encoding/json"
     "strings"
 
-    globals "github.com/TheGoodLookingCompany/slack/globals"
-	logging "github.com/TheGoodLookingCompany/slack/logging"
-	hangman "github.com/TheGoodLookingCompany/slack/hangman"
+    globals "github.com/aerophite/slacky/globals"
+	logging "github.com/aerophite/slacky/logging"
+	hangman "github.com/aerophite/slacky/hangman"
 	"github.com/ejholmes/slash"
 	"golang.org/x/net/context"
 )
