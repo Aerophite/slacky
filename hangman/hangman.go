@@ -42,6 +42,7 @@ type Config struct {
     Messages `json:"messages"`
     Log logging.Log `json:"log"`
     GamesLog logging.Log `json:"gamesLog"`
+    StatsLog logging.Log `json:"statsLog"`
 }
 
 type Game struct {
@@ -83,9 +84,51 @@ type Games struct {
     Games []Game `json:"games"`
 }
 
+type HangmanChannel struct {
+    Channel globals.Channel `json:"channel"`
+    Values map[string]int `json:"values"`
+}
+
+type Stat struct {
+    User globals.User `json:"user"`
+    HangmanChannels []HangmanChannel `json:"hangmanChannel"`
+}
+
+func (stats Stats) FindStat(channel globals.Channel, user globals.User) (int, int) {
+    for i := 0; i < len(stats.Stats); i++ {
+        if (stats.Stats[i].User.ID == user.ID) {
+            for j := 0; j < len(stats.Stats[i].HangmanChannels); j++ {
+                if (stats.Stats[i].HangmanChannels[j].Channel.ID == channel.ID) {
+                    return i, j;
+                }
+            }
+
+            return i, -1
+        }
+    }
+    return -1, -1
+}
+
+func (stats Stats) AddStat(stat Stat) (int, Stat) {
+    stats.Stats = append(stats.Stats, stat)
+    SetStats(stats)
+
+    return (len(stats.Stats)-1), stat
+}
+
+func (stats Stats) AddToStat(statIndex int, hangmanChannelIndex int, field string) {
+    stats.Stats[statIndex].HangmanChannels[hangmanChannelIndex].Values[field]++
+    SetStats(stats)
+}
+
+type Stats struct {
+    Stats []Stat `json:"stats"`
+}
+
 var (
     config Config
     games Games
+    stats Stats
 )
 
 func init() {
@@ -123,7 +166,22 @@ func init() {
         config.GamesLog.File = "games.json"
     }
 
+    if (config.StatsLog.Directory == "default") {
+        dir, err := os.Getwd()
+        if err != nil {
+            fmt.Println("[Fatal Error] " + err.Error())
+            log.Fatal(err)
+        }
+
+        config.StatsLog.Directory = dir + "/hangman/logs/"
+    }
+
+    if (config.StatsLog.File == "default") {
+        config.StatsLog.File = "stats.json"
+    }
+
     GetGames()
+    GetStats()
 }
 
 func SetGames(changedGames Games) {
@@ -143,6 +201,27 @@ func GetGames() {
     if err == nil {
         if err := json.Unmarshal(file, &games); err != nil {
             log.Fatal(fmt.Sprintf("Cannot parse : %s", config.GamesLog.File) + err.Error())
+        }
+    }
+}
+
+func SetStats(changedStats Stats) {
+    stats = changedStats
+    b, err := json.Marshal(stats)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    // fmt.Println(string(b))
+    ioutil.WriteFile(config.StatsLog.Directory + config.StatsLog.File, b, 0666)
+}
+
+func GetStats() {
+    file, err := ioutil.ReadFile(config.StatsLog.Directory + config.StatsLog.File)
+
+    if err == nil {
+        if err := json.Unmarshal(file, &stats); err != nil {
+            log.Fatal(fmt.Sprintf("Cannot parse : %s", config.StatsLog.File) + err.Error())
         }
     }
 }
@@ -196,6 +275,16 @@ func generateReply(sentence string, replacements map[string]string) string {
 
 func Hangman(message globals.Message) error {
     _, gameIndex, _ := games.FindGame(message.Channel.ID)
+    statIndex, hangmanChannelIndex := stats.FindStat(message.Channel, message.User)
+
+    if (statIndex == -1) {
+        stats.AddStat(Stat{
+            message.User,
+            []HangmanChannel{
+                message.Channel,
+                map[string]int{"started": 0, "games": 0, "wins": 0, "guesses": 0, "correct": 0}}})
+    }
+
     numOfFields := len(message.Fields)
 
     if (strings.Replace(message.Text, "_", "", -1) != message.Text) {
@@ -211,7 +300,9 @@ func Hangman(message globals.Message) error {
             ping(message)
         case "start":
             if (hasRequiredGame(gameIndex, true, message) && hasRequiredSize(1, numOfFields, message)) {
-                start(message)
+                if err := start(message); err != nil {
+                    stats.AddToStat(statIndex, hangmanChannelIndex, "Games")
+                }
             }
         case "guess":
             if (hasRequiredGame(gameIndex, false, message) && hasRequiredSize(1, numOfFields, message)) {
@@ -223,7 +314,7 @@ func Hangman(message globals.Message) error {
             }
         case "stat":
             if (hasRequiredGame(gameIndex, false, message)) {
-                stat(message, gameIndex, true)
+                status(message, gameIndex, true)
             }
         case "help":
             help(message)
@@ -267,7 +358,8 @@ func start(message globals.Message) error { // sentence, number of guesses
     if err := message.Responder.Respond(slash.Say(generateReply(config.Messages.Begin, map[string]string {"<name>": message.User.Name}))); err != nil {
         return err
     }
-    stat(message, gameIndex, false)
+
+    status(message, gameIndex, false)
 
     return nil
 }
@@ -294,7 +386,7 @@ func guess(message globals.Message, gameIndex int) error { // guess
             return err
         }
 
-        stat(message, gameIndex, true)
+        status(message, gameIndex, true)
         return nil
     } else {
         replace := ""
@@ -313,6 +405,7 @@ func guess(message globals.Message, gameIndex int) error { // guess
             re2 := regexp.MustCompile("((\\w) )")
             actualSentence = re2.ReplaceAllString(currentSentence, "$2")
             actualSentence = strings.Replace(actualSentence, "  ", " ", -1);
+            re = regexp.MustCompile("([^a-zA-Z0-9_])")
             actualSentence = re.ReplaceAllString(strings.ToLower(currentSentence), "")
         } else {
             games.Games[gameIndex].Guesses[strings.ToLower(actualGuess)] = true
@@ -350,7 +443,7 @@ func guess(message globals.Message, gameIndex int) error { // guess
             return err
         }
 
-        stat(message, gameIndex, false)
+        status(message, gameIndex, false)
     }
 
     SetGames(games)
@@ -394,7 +487,7 @@ func stop(message globals.Message, gameIndex int, override bool) error {
     return nil
 }
 
-func stat(message globals.Message, gameIndex int, reply bool) error {
+func status(message globals.Message, gameIndex int, reply bool) error {
     logging.WriteToLog("stat", config.Log);
 
     remaining := ""
@@ -436,7 +529,7 @@ func stat(message globals.Message, gameIndex int, reply bool) error {
     return nil
 }
 
-func help (message globals.Message) error {
+func help(message globals.Message) error {
     reply := "\n*/hangman help* : This screen, just showing you some helpful commands.\n\n*/hangman start (word|sentence)* : Start a game in the current channel. Your word or sentence will not be shown to anyone.\n\n*/hangman stop* : Stops a game. Can only be ran by the person that started the game.\n\n*/hangman guess (character|sentence)* : Make a guess at the word or sentence. If guessing a sentence, it will attempt an exact match (minus punctuation and spaces).\n\n*/hangman stat* : Get the current status of the game.\n"
 
     if err := message.Responder.Respond(slash.Reply(reply)); err != nil {
