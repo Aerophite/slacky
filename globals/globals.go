@@ -55,6 +55,7 @@ type Message struct {
     Token string
     Team Team
     Command string
+    Text string
     Fields []string
     Channel Channel
     User User

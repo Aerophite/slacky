@@ -17,7 +17,8 @@
 		"end": "The game has stopped by *<name>*",
 		"invalidCommand": "That is not a valid command",
 		"notEnoughArguments": "Command requires at least *<min>* argument(s)",
-		"stat": "<currentSentence>\n*<guessesRemaining>* guess(es) remaining\nRemaining: <remaining>\nGuessed: <guessed>"
+		"stat": "<currentSentence>\n*<guessesRemaining>* guess(es) remaining\nRemaining: <remaining>\nGuessed: <guessed>",
+		"starterCantGuess": "You started the game and so can't guess!"
 	},
 	"log": {
 		"enabled": true,

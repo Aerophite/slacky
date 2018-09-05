@@ -31,6 +31,7 @@ type Messages struct {
     InvalidCommand string `json:"invalidCommand"`
     NotEnoughArguments string `json:"notEnoughArguments"`
     Stat string `json:"stat"`
+    StarterCantGuess string `json:"starterCantGuess"`
 }
 
 type Config struct {
@@ -197,6 +198,14 @@ func Hangman(message globals.Message) error {
     _, gameIndex, _ := games.FindGame(message.Channel.ID)
     numOfFields := len(message.Fields)
 
+    if (strings.Replace(message.Text, "_", "", -1) != message.Text) {
+        if err := message.Responder.Respond(slash.Reply("Underscores are not allowed")); err != nil {
+            return err
+        }
+
+        return nil
+    }
+
     switch message.Command {
         case "ping":
             ping(message)
@@ -266,6 +275,14 @@ func start(message globals.Message) error { // sentence, number of guesses
 func guess(message globals.Message, gameIndex int) error { // guess
     logging.WriteToLog("guess", config.Log);
 
+    if (config.AllowStarterToGuess == false && message.User.ID == games.Games[gameIndex].Starter.ID) {
+        if err := message.Responder.Respond(slash.Reply(config.Messages.StarterCantGuess)); err != nil {
+            return err
+        }
+
+        return nil
+    }
+
     actualGuess := strings.Join(strings.Fields(strings.Join(message.Fields, " ")), " ")
     actualSentence := ""
     currentSentence := ""
@@ -293,9 +310,9 @@ func guess(message globals.Message, gameIndex int) error { // guess
             replace = replace + "]"
 
             currentSentence = generateHangmanString(games.Games[gameIndex].Sentence, replace)
-            /*re2 = regexp.MustCompile("((\\w) )")
+            re2 := regexp.MustCompile("((\\w) )")
             actualSentence = re2.ReplaceAllString(currentSentence, "$2")
-            actualSentence = strings.Replace(actualSentence, "  ", " ", -1);*/
+            actualSentence = strings.Replace(actualSentence, "  ", " ", -1);
             actualSentence = re.ReplaceAllString(strings.ToLower(currentSentence), "")
         } else {
             games.Games[gameIndex].Guesses[strings.ToLower(actualGuess)] = true

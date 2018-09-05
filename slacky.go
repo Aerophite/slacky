@@ -62,6 +62,7 @@ func Handle(ctx context.Context, r slash.Responder, command slash.Command) error
 		command.Token,
 		globals.Team{command.TeamID, command.TeamDomain},
 		field,
+		command.Text,
 		fields,
 		globals.Channel{command.ChannelID, command.ChannelName},
 		globals.User{command.UserID, command.UserName, command.ResponseURL},
