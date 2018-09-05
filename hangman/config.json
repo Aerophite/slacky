@@ -1,0 +1,32 @@
+{
+	"numberOfGuesses": 6,
+	"defaultChannel": "",
+	"allowConcurrentGuesses": true,
+	"allowStarterToGuess": true,
+	"messages": {
+		"begin": "A hangman game has been started in this channel by *<name>*!",
+		"alreadyBegan": "There is already a game running in this channel.",
+		"requiresRunning": "There isn't a game running in this channel.",
+		"won": "The game has been won by *<name>*! The word was: *<sentence>*",
+		"lose": "You lose! The word was: *<sentence>*",
+		"correct": "Correct guess by <name>: *<guess>*",
+		"wrong": "Wrong guess by <name>: *<guess>*",
+		"duplicate": "Already guessed: *<guess>*",
+		"starterGuess": "You started the game and so can't guess.",
+		"onlyStarter": "Only the starter of the game can do this!",
+		"end": "The game has stopped by *<name>*",
+		"invalidCommand": "That is not a valid command",
+		"notEnoughArguments": "Command requires at least *<min>* argument(s)",
+		"stat": "<currentSentence>\n*<guessesRemaining>* guess(es) remaining\nRemaining: <remaining>\nGuessed: <guessed>"
+	},
+	"log": {
+		"enabled": true,
+		"directory": "default",
+		"file": "default"
+	},
+	"gamesLog": {
+		"enabled": true,
+		"directory": "default",
+		"file": "default"
+	}
+}
