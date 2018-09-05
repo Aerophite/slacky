@@ -180,7 +180,7 @@ func generateHangmanString(sentence string, replace string) (string) {
     sentence = re.ReplaceAllString(sentence, " $1")
     sentence = strings.Replace(sentence, "    ", "   ", -1)
 
-    return sentence
+    return strings.Trim(sentence)
 }
 
 func generateReply(sentence string, replacements map[string]string) string {
