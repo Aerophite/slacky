@@ -275,7 +275,7 @@ func start(message globals.Message) error { // sentence, number of guesses
 func guess(message globals.Message, gameIndex int) error { // guess
     logging.WriteToLog("guess", config.Log);
 
-    if (config.AllowStarterToGuess == false && message.User.ID == games.Games[gameIndex].Starter.ID) {
+    if (message.Channel.Name != "directmessage" && config.AllowStarterToGuess == false && message.User.ID == games.Games[gameIndex].Starter.ID) {
         if err := message.Responder.Respond(slash.Reply(config.Messages.StarterCantGuess)); err != nil {
             return err
         }
