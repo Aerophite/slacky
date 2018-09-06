@@ -61,3 +61,7 @@ type Message struct {
     User User
     Responder slash.Responder
 }
+
+func PredefineError() error {
+    return nil
+}

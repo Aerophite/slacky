@@ -55,7 +55,7 @@ func main() {
 
 func Handle(ctx context.Context, r slash.Responder, command slash.Command) error {
 
-	fields := strings.Split(command.Text, " ")
+	fields := strings.Fields(strings.TrimSpace(command.Text))
     field, fields := fields[0], fields[1:]
 
 	message := globals.Message{
