@@ -579,7 +579,10 @@ func stat(message globals.Message) error {
             reply = reply + generateUserStat(userValue) + "\n----------\n\n"
         }
     } else {
-        reply = generateUserStat(stats.Stats[message.Channel.ID][message.Fields[0]])
+        userArray := strings.Split(message.Fields[0], "|")
+        userID := strings.Replace(userArray[0], "<@", "", -1)
+        // logging.WriteToLog(fmt.Sprintf("UserID: %s", userID), config.Log)
+        reply = generateUserStat(stats.Stats[message.Channel.ID][userID])
     }
 
     if err := message.Responder.Respond(slash.Reply(reply)); err != nil {
