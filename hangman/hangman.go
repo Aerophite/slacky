@@ -436,6 +436,7 @@ func guess(message globals.Message, gameIndex int) error { // guess
                 return err
             }
 
+            stats.AddToStat(message, "correct")
             stats.AddToStat(message, "won")
             stop(message, gameIndex, true)
             return nil
@@ -449,7 +450,16 @@ func guess(message globals.Message, gameIndex int) error { // guess
                     return err
                 }
 
-                stats.AddToStat(message, "lost")
+                stats.AddToStat(message, "wrong")
+                for playerID, _ := range games.Games[gameIndex].Players {
+                    if _, ok := stats.Stats[message.Channel.ID][playerID].Counts["lost"]; !ok {
+                        stats.Stats[message.Channel.ID][playerID].Counts["lost"] = 1
+                    } else {
+                        stats.Stats[message.Channel.ID][playerID].Counts["lost"]++
+                    }
+
+                }
+                SetStats(stats)
                 stop(message, gameIndex, true)
                 return nil
             }
