@@ -281,8 +281,9 @@ func Hangman(message globals.Message) error {
         stats.AddStat(Stat{
             message.User,
             []HangmanChannel{
+                HangmanChannel{
                 message.Channel,
-                map[string]int{"started": 0, "games": 0, "wins": 0, "guesses": 0, "correct": 0}}})
+                map[string]int{"started": 0, "games": 0, "wins": 0, "guesses": 0, "correct": 0}}}})
     }
 
     numOfFields := len(message.Fields)
