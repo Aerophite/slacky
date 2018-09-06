@@ -551,7 +551,7 @@ func status(message globals.Message, gameIndex int, reply bool) error {
 
 func help(message globals.Message) error {
     logging.WriteToLog("help", config.Log);
-    reply := "\n*/hangman help* : This screen, just showing you some helpful commands.\n\n*/hangman start (word|sentence)* : Start a game in the current channel. Your word or sentence will not be shown to anyone.\n\n*/hangman stop* : Stops a game. Can only be ran by the person that started the game.\n\n*/hangman guess (character|sentence)* : Make a guess at the word or sentence. If guessing a sentence, it will attempt an exact match (minus punctuation and spaces).\n\n*/hangman status* : Get the current status of the game.\n\n*/hangman stat [@username]* : Get the current stats of this channel. If @username is sent, will get the stats for the specific person."
+    reply := "\n*/hangman help* : This screen, just showing you some helpful commands.\n\n*/hangman start (word|sentence)* : Start a game in the current channel. Your word or sentence will not be shown to anyone.\n\n*/hangman stop* : Stops a game. Can only be ran by the person that started the game.\n\n*/hangman guess (character|sentence)* : Make a guess at the word or sentence. If guessing a sentence, it will attempt an exact match (minus punctuation and spaces).\n\n*/hangman status* : Get the current status of the game.\n\n*/hangman stat (@username)* : Get the current stats of this channel. If @username is sent, will get the stats for the specific person."
 
     if err := message.Responder.Respond(slash.Reply(reply)); err != nil {
         return err
