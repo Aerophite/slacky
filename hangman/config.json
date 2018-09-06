@@ -1,6 +1,5 @@
 {
 	"numberOfGuesses": 6,
-	"defaultChannel": "",
 	"allowConcurrentGuesses": true,
 	"allowStarterToGuess": false,
 	"messages": {

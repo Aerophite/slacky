@@ -36,7 +36,6 @@ type Messages struct {
 
 type Config struct {
     NumberOfGuesses int `json:"numberOfGuesses"`
-    DefaultChannel string `json:"defaultChannel"`
     AllowConcurrentGuesses bool `json:"allowConcurrentGuesses"`
     AllowStarterToGuess bool `json:"allowStarterToGuess"`
     Messages `json:"messages"`
