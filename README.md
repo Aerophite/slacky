@@ -1,2 +1,2 @@
 # slacky
-Slackbot
+Slack bot for playing Hangman
